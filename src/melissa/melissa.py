@@ -53,17 +53,17 @@ class Melissa:
             self.logger.info('Connection to database established')
 
         try:
-            self.parameters['adv_minutes'] = self.session.query(models.Parameter).get('adv_minutes').p_value
-            self.parameters['adv_questions'] = self.session.query(models.Parameter).get('adv_questions').p_value
-            self.parameters['base_points'] = self.session.query(models.Parameter).get('base_points').p_value
-            self.parameters['current_broadcast'] = self.session.query(models.Parameter).get('current_broadcast').p_value
-            self.parameters['google_points'] = self.session.query(models.Parameter).get('google_points').p_value
-            self.parameters['hint_pause'] = self.session.query(models.Parameter).get('hint_pause').p_value
-            self.parameters['max_time'] = self.session.query(models.Parameter).get('max_time').p_value
-            self.parameters['min_members'] = self.session.query(models.Parameter).get('min_members').p_value
-            self.parameters['next_pause'] = self.session.query(models.Parameter).get('next_pause').p_value
-            self.parameters['series_max'] = self.session.query(models.Parameter).get('series_max').p_value
-            self.parameters['top_limit'] = self.session.query(models.Parameter).get('top_limit').p_value
+            self.parameters['adv_minutes'] = self.session.query(models.Parameter).get('adv_minutes').value
+            self.parameters['adv_questions'] = self.session.query(models.Parameter).get('adv_questions').value
+            self.parameters['base_points'] = self.session.query(models.Parameter).get('base_points').value
+            self.parameters['current_broadcast'] = self.session.query(models.Parameter).get('current_broadcast').value
+            self.parameters['google_points'] = self.session.query(models.Parameter).get('google_points').value
+            self.parameters['hint_pause'] = self.session.query(models.Parameter).get('hint_pause').value
+            self.parameters['max_time'] = self.session.query(models.Parameter).get('max_time').value
+            self.parameters['min_members'] = self.session.query(models.Parameter).get('min_members').value
+            self.parameters['next_pause'] = self.session.query(models.Parameter).get('next_pause').value
+            self.parameters['series_max'] = self.session.query(models.Parameter).get('series_max').value
+            self.parameters['top_limit'] = self.session.query(models.Parameter).get('top_limit').value
         except Exception as e:  # TODO specify exceptions
             self.logger.error(e)
             self.parameters = Config.DEFAULT_PARAMETERS
