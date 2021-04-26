@@ -22,6 +22,7 @@ class Config:
     DEFAULT_PARAMETERS = {'adv_minutes': 10,
                           'adv_questions': 20,
                           'base_points': 5,
+                          'current_broadcast': 0,
                           'google_points': -50,
                           'hint_pause': 5,
                           'max_time': 180,
