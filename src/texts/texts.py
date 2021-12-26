@@ -18,8 +18,8 @@ class Texts:
         language_files = {'en': './language/english.json', 'ru': './language/russian.json'}
         for lang in language_files.keys():
             self.texts[lang] = json.load(open(language_files[lang], 'r', encoding='utf8'))
-            self.jokes[lang] = self.get_text('jokes').split("\n")
-            self.bad_words[lang] = self.get_text('bad_words').split("\n")
+            self.jokes[lang] = self.get_text('jokes', lang=lang).split("\n")
+            self.bad_words[lang] = self.get_text('bad_words', lang=lang).split("\n")
 
     def get_text(self, text_id, lang='en'):
         """
@@ -43,7 +43,7 @@ class Texts:
         :return: bool
             True if message contains bad word
         """
-        if any([True if x in self.bad_words[lang] else False for x in message.lower().split(" ")]):
+        if any([x in self.bad_words[lang] for x in message.lower().split(" ")]):
             return True
         else:
             return False
