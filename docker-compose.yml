@@ -1,0 +1,34 @@
+# python-telegram-quiz
+# @author: Aleksandr Gordienko
+# @site: https://github.com/aleksandrgordienko/melissa-quiz
+
+version: '3'
+
+services:
+  postgres:
+    # run from CLI:
+    # docker run -d --rm -v $(pwd)/pg_data:/var/lib/postgresql/data -e POSTGRES_USER=melissa -e POSTGRES_PASSWORD=melissa -e POSTGRES_DB=melissa -p 5432:5432 postgres:13
+    image: postgres:13
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: melissa
+      POSTGRES_PASSWORD: melissa
+      POSTGRES_DB: melissa
+    volumes:
+      - $PWD/pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "melissa"]
+      interval: 5s
+      retries: 5
+    restart: always
+
+  melissa:
+    # run from CLI:
+    # docker run -d --rm --env-file .env datadiving/melissa-quiz
+    image: datadiving/melissa-quiz:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    restart: always
