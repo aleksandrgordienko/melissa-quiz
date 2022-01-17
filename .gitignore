@@ -4,3 +4,5 @@ log.txt
 behave/
 __pycache__
 .env
+localenv/
+pg_data/

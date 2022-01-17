@@ -1,0 +1,51 @@
+#!/bin/bash
+
+display_help() {
+   # Display Help
+   echo "======================================"
+   echo "          Melissa Quiz runner"
+   echo "======================================"
+   echo "Syntax: melissa [command]"
+   echo
+   echo "---commands---"
+   echo "help       Print this help"
+   echo "localenv   Create local environment"
+   echo "tests      Run 'behave' test suite"
+   echo "start      Start Melissa Quiz locally"
+   echo
+}
+
+activate() {
+  . localenv/bin/activate
+  set -o allexport
+  . .env
+  set +o allexport
+}
+
+case "$1" in
+localenv)
+   rm -rf localenv
+   python3 -m venv localenv
+   activate
+   pip3 install -r src/requirements.txt
+   ;;
+tests)
+   activate
+   cd src
+   behave
+   cd ..
+   ;;
+start)
+   activate
+   cd src
+   python3 main.py
+   cd ..
+   ;;
+help)
+   display_help
+   ;;
+*)
+   echo "No command specified, displaying help"
+   display_help
+   ;;
+esac
