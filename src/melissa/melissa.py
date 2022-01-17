@@ -477,7 +477,7 @@ class Melissa:
                                          lang=update.effective_user.language_code) \
                         .format(multiplier=multiplier))
 
-            user.add_points(points)
+            user.add_points(multiplied_points)
             self.session.merge(models.User(chat_id=chat.id,
                                            id=user.id,
                                            points=user.points,

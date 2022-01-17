@@ -33,7 +33,7 @@ class TextQuiz:
 
     def nextq(self):
         """Generates next question_id, question_type and initial_hint"""
-        question_id = randint(0, len(self.questions))
+        question_id = randint(0, len(self.questions)-1)
         question = self.questions[question_id]
         question['ask_count'] += 1
         self.session.merge(Question(id=question_id,
