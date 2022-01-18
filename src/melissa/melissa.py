@@ -438,7 +438,7 @@ class Melissa:
                 parse_mode='HTML')
             return
 
-        if chat.game.answer_is_correct(chat.q_id, update.message.text):
+        if chat.game.answer_is_correct(chat.q_id, update.message.text) and chat.is_on:
             # turn off game, we don't want to get more than one winner
             chat.is_on = False
 
