@@ -39,6 +39,8 @@ class Melissa:
             filename=Config.LOG_FILE_NAME,
             level=Config.LOG_LEVEL
         )
+        consoleHandler = logging.StreamHandler()
+        self.logger.addHandler(consoleHandler)
 
         try:
             self.db_engine = sqlalchemy.create_engine(Config.SQLALCHEMY_DB_CONN)
@@ -50,7 +52,7 @@ class Melissa:
             self.logger.critical(e)
             exit(errno.ECONNREFUSED)
         else:
-            self.logger.info('Connection to database established')
+            self.logger.warning('Connection to database established')
 
         try:
             self.parameters['adv_minutes'] = self.session.query(models.Parameter).get('adv_minutes').value
@@ -93,7 +95,7 @@ class Melissa:
             self.logger.critical(e)
             exit(errno.ECONNREFUSED)
         else:
-            self.logger.info('Connection to Telegram established')
+            self.logger.warning('Connection to Telegram established')
 
             dp = updater.dispatcher
 
@@ -111,7 +113,7 @@ class Melissa:
 
             dp.add_error_handler(self.errors)
 
-            self.logger.info('Melissa Quiz starting... ')
+            self.logger.warning('Melissa Quiz started... ')
 
             updater.start_polling()
 
@@ -128,8 +130,7 @@ class Melissa:
 
         self.logger.info(update.message.text + ' from user ' + str(update.effective_user.id))
 
-        greetings = self.texter.get_text(text_id='greetings',
-                                         lang=update.effective_user.language_code)
+        greetings = self.texter.get_text(text_id='greetings')
 
         greetings = greetings.format(
             min_members=self.parameters['min_members'],
@@ -157,13 +158,10 @@ class Melissa:
             parameter, value = update.message.text.split(' ', 3)[1:3]
             self.parameters[parameter] = value
         except Exception as e:  # TODO specify exceptions
-            update.message.reply_text(self.texter.get_text('set_parameter_format',
-                                                           lang=update.effective_user.language_code))
-        out_text = self.texter.get_text('set_parameter_head',
-                                        lang=update.effective_user.language_code)
+            update.message.reply_text(self.texter.get_text('set_parameter_format'))
+        out_text = self.texter.get_text('set_parameter_head')
         for p in self.parameters:
-            out_text += self.texter.get_text('set_parameter_text',
-                                             lang=update.effective_user.language_code) \
+            out_text += self.texter.get_text('set_parameter_text') \
                 .format(parameter=p,
                         value=self.parameters[p])
         update.message.reply_text(out_text)
@@ -178,8 +176,7 @@ class Melissa:
 
         if update.effective_chat.id in self.chats \
                 and update.effective_user.id in self.chats[update.effective_chat.id].users:
-            out_text = self.texter.get_text('score_head',
-                                            lang=update.effective_user.language_code) \
+            out_text = self.texter.get_text('score_head') \
                 .format(user_name=update.effective_user.name)
             out_text += self.texter.get_text('score_text').format(
                 points=self.chats[update.effective_chat.id].users[update.effective_user.id].get_points())
@@ -205,16 +202,14 @@ class Melissa:
         if top_qty > self.parameters['top_limit']:
             top_qty = self.parameters['top_limit']
 
-        out_text = self.texter.get_text('top_head',
-                                        lang=update.effective_user.language_code) \
+        out_text = self.texter.get_text('top_head') \
             .format(top_qty=top_qty)
 
         players = self.session.query(models.User).order_by(models.User.points.desc()).limit(top_qty)
 
         # TODO fix: problem with stored emoji (utf8mb4)
         for player in players:
-            out_text += self.texter.get_text('top_line',
-                                             lang=update.effective_user.language_code) \
+            out_text += self.texter.get_text('top_line') \
                 .format(bullet='•',
                         user=player.user_name,
                         points=player.points)
@@ -230,8 +225,7 @@ class Melissa:
         self.logger.info(update.message.text + ' from user ' + str(update.effective_user.id))
 
         if update.effective_chat.get_members_count() < self.parameters['min_members']:
-            out_text = self.texter.get_text('min_members_group_play',
-                                            lang=update.effective_user.language_code)
+            out_text = self.texter.get_text('min_members_group_play')
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=out_text.format(min_members=self.parameters['min_members']),
@@ -241,11 +235,8 @@ class Melissa:
         if update.effective_chat.id not in self.chats:
             # TODO improvement: add different game types later
             game = self.games['textquiz']
-
-            user = User(update.effective_user.id,
-                        update.effective_user.username)
             chat = Chat(c_id=update.effective_chat.id,
-                        u_id=user.id,
+                        u_id=update.effective_user.id,
                         game=game,
                         parameters=self.parameters,
                         is_on=True)
@@ -255,13 +246,12 @@ class Melissa:
                                            q_id=chat.q_id,
                                            is_on=chat.is_on,
                                            game=chat.game.name))
-            self.session.merge(models.User(chat_id=chat.id,
-                                           id=user.id,
-                                           points=user.points,
-                                           user_name=user.name,
-                                           correct_answers=user.correct_answers))
             self.session.commit()
             self.chats[update.effective_chat.id] = chat
+        else:
+            chat = self.chats[update.effective_chat.id]
+        if update.effective_user.id not in chat.users:
+            self.new_player(update)
         self.cmd_ask(update, context)
 
     def cmd_hint(self, update, context):
@@ -282,12 +272,9 @@ class Melissa:
         hint_result = chat.do_hint()
 
         if hint_result == 'hint_ok':
-            sym = self.texter.get_text('hint_symbol',
-                                       lang=update.effective_user.language_code)
-            sep = self.texter.get_text('hint_separator',
-                                       lang=update.effective_user.language_code)
-            out_text = self.texter.get_text('hint_text',
-                                            lang=update.effective_user.language_code) \
+            sym = self.texter.get_text('hint_symbol')
+            sep = self.texter.get_text('hint_separator')
+            out_text = self.texter.get_text('hint_text') \
                 .format(hint_text=chat.get_hint_text(sym, sep))
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text=out_text,
@@ -300,13 +287,11 @@ class Melissa:
                                            is_on=chat.is_on,
                                            game=chat.game.name))  # TODO improvement: add different game types later
             self.session.commit()
-            out_text = self.texter.get_text('nobody_could',
-                                            lang=update.effective_user.language_code)
+            out_text = self.texter.get_text('nobody_could')
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text=out_text,
                                      parse_mode='HTML')
-            out_text = self.texter.get_text('ask_question',
-                                            lang=update.effective_user.language_code) \
+            out_text = self.texter.get_text('ask_question') \
                 .format(question=chat.get_question())
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text=out_text,
@@ -337,8 +322,7 @@ class Melissa:
             self.session.commit()
             self.cmd_ask(update, context)
         else:
-            out_text = self.texter.get_text('lets_think_more',
-                                            lang=update.effective_user.language_code) \
+            out_text = self.texter.get_text('lets_think_more') \
                 .format(question=chat.get_question())
             context.bot.send_message(
                 chat_id=chat.id,
@@ -362,9 +346,7 @@ class Melissa:
             context.bot.forward_message(chat.id,
                                         self.channel,
                                         self.parameters['current_broadcast'])
-
-        out_text = self.texter.get_text('ask_question',
-                                        lang=update.effective_user.language_code) \
+        out_text = self.texter.get_text('ask_question') \
             .format(question=chat.get_question())
         context.bot.send_message(
             chat_id=chat.id,
@@ -398,29 +380,12 @@ class Melissa:
             return
 
         if update.effective_user.id not in chat.users:
-            try:
-                # getting user from database
-                result = self.session.query(models.User).\
-                    filter(models.User.id == update.effective_user.id and models.User.chat_id == chat.id)
-                user = User(u_id=result[0].id,
-                            name=result[0].user_name,
-                            correct_answers=result[0].correct_answers,
-                            points=result[0].points)
-            except Exception as e:
-                # new user
-                self.logger.info(str(e))
-                user = User(u_id=update.effective_user.id,
-                            name=update.effective_user.username,
-                            correct_answers=0,
-                            points=0)
-            chat.new_user(user)
-        else:
-            user = chat.users[update.effective_user.id]
+            self.new_player(update)
+        user = chat.users[update.effective_user.id]
 
         if chat.max_time_exceed():
             context.bot.send_message(chat_id=chat.id,
-                                     text=self.texter.get_text('nobody_could',
-                                                               lang=update.effective_user.language_code),
+                                     text=self.texter.get_text('nobody_could'),
                                      parse_mode='HTML')
             chat.next_question()
             self.session.merge(models.Chat(id=chat.id,
@@ -429,8 +394,7 @@ class Melissa:
                                            is_on=chat.is_on,
                                            game=chat.game.name))  # TODO improvement: add different game types later
             self.session.commit()
-            out_text = self.texter.get_text('ask_question',
-                                            lang=update.effective_user.language_code) \
+            out_text = self.texter.get_text('ask_question') \
                 .format(question=chat.get_question())
             context.bot.send_message(
                 chat_id=chat.id,
@@ -456,8 +420,7 @@ class Melissa:
                 multiplier = 2
                 points = points * multiplier
                 combo_str_list.append(
-                    self.texter.get_text('quick_answer',
-                                         lang=update.effective_user.language_code) \
+                    self.texter.get_text('quick_answer') \
                         .format(multiplier=multiplier))
 
             # count correct answer in chat and user
@@ -466,15 +429,13 @@ class Melissa:
             # if user exceeded limit count of answers in series
             if chat.answer_count > chat.parameters['series_max']:
                 points = chat.parameters['google_points']
-                combo_str_list.append(self.texter.get_text('was_googled',
-                                                           lang=update.effective_user.language_code))
+                combo_str_list.append(self.texter.get_text('was_googled'))
             else:
                 # series is going, multiply points
                 multiplier = chat.answer_count
                 multiplied_points = points * multiplier
                 combo_str_list.append(
-                    self.texter.get_text('series_answer',
-                                         lang=update.effective_user.language_code) \
+                    self.texter.get_text('series_answer') \
                         .format(multiplier=multiplier))
 
             user.add_points(multiplied_points)
@@ -483,13 +444,11 @@ class Melissa:
                                            points=user.points,
                                            user_name=user.name))
             self.session.commit()
-            out_text = self.texter.get_text('get_points',
-                                            lang=update.effective_user.language_code) \
+            out_text = self.texter.get_text('get_points') \
                 .format(username=user.get_name(),
                         points=str(points))
             out_text += '\n' + '\n'.join(combo_str_list)
-            out_text += '\n' + self.texter.get_text('result_points',
-                                                    lang=update.effective_user.language_code) \
+            out_text += '\n' + self.texter.get_text('result_points') \
                 .format(points=str(multiplied_points))
 
             # congratulate user
@@ -505,8 +464,7 @@ class Melissa:
                                            is_on=chat.is_on))
             self.session.commit()
 
-            out_text = self.texter.get_text('ask_question',
-                                            lang=update.effective_user.language_code) \
+            out_text = self.texter.get_text('ask_question') \
                 .format(question=chat.get_question())
             context.bot.send_message(
                 chat_id=chat.id,
@@ -515,6 +473,35 @@ class Melissa:
         # wrong answer and bad words in it
         elif self.texter.check_bad(update.message.text):
             update.message.reply_text(self.texter.get_joke())
+
+    def new_player(self, update):
+        self.logger.warning('step1')
+        chat = self.chats[update.effective_chat.id]
+        try:
+            # getting user from database
+            result = self.session.query(models.User).\
+                filter(models.User.id == update.effective_user.id and models.User.chat_id == chat.id)
+            self.logger.warning('step2')
+            user = User(u_id=result[0].id,
+                        name=result[0].user_name,
+                        correct_answers=result[0].correct_answers,
+                        points=result[0].points)
+        except Exception as e:
+            # new user
+            self.logger.info(str(e))
+            user = User(u_id=update.effective_user.id,
+                        name=update.effective_user.username)
+            self.logger.warning('step3')
+            self.session.merge(models.User(chat_id=chat.id,
+                                           id=user.id,
+                                           points=user.points,
+                                           user_name=user.name,
+                                           correct_answers=user.correct_answers))
+            self.logger.warning('step4')
+            self.session.commit()
+        self.logger.warning('step5')
+        chat.new_user(user)
+        self.logger.warning('step6')
 
     def errors(self, update, context):
         """Error handler"""
