@@ -1,5 +1,5 @@
 {
-    "greetings": "Hi! This is a quiz-bot.\nAfter adding to group chat, you could play a quiz by sending command /play ({min_members} min users in group). You'll have {max_time} seconds for each question. If nobody sent correct answer, the game stops accepting answers.\n\nAppropriate commands:\n/play - play game\n/ask - ask question again\n/hint - free hint (1 time in {hint_pause} sec.)\n/next - go to the next question\n/score - your result\n/top10 - top 10 player\n\nWanna run bot like this? Source code is located at <a href='https://github.com/aleksandrgordienko/melissa-quiz'>GitHub.com</a>. Contribution is appreciated!",
+    "greetings": "Hi! This is a quiz-bot.\nAfter adding to group chat, you could play a quiz by sending command /play ({min_members} min users in group). You'll have {max_time} seconds for each question. If nobody sent correct answer, the game stops accepting answers.\n\nAppropriate commands:\n/play - play game\n/stop - stop game\n/lang - switch language\n/ask - ask question again\n/hint - free hint (1 time in {hint_pause} sec.)\n/next - go to the next question\n/score - your result\n/top10 - top 10 player\n\nWanna run bot like this? Source code is located at <a href='https://github.com/aleksandrgordienko/melissa-quiz'>GitHub.com</a>. Contribution is appreciated!",
     "top_head": "TOP-{top_qty} players\n",
     "top_line": "{bullet} {user} {points} points\n",
     "score_head": "{user_name},\n",
@@ -42,5 +42,6 @@
     "choose_topic": "Please, choose a topic and earn <b>{points} points</b>. Other players vote with you. If your choice will be the most popular, you'll get additional points:",
     "choose_topic_line": "{t_cmd} - {t_name}",
     "get_points_topic": "{username} gets <b>{points} points</b> for chosen topic",
-    "broadcast_newpost": "New message in channel. Use this command to broadcast:\n/setparameter current_broadcast {message_id}"
+    "broadcast_newpost": "New message in channel. Use this command to broadcast:\n/setparameter current_broadcast {message_id}",
+    "lang_set": "Language {lang} was set for group chat"
 }

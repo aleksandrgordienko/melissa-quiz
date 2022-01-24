@@ -10,7 +10,7 @@ from random import randint
 class Chat:
     """Chat class"""
 
-    def __init__(self, c_id, u_id, game, parameters, is_on, q_id=None):
+    def __init__(self, c_id, u_id, game, parameters, is_on, lang, q_id=None):
         self.id = c_id
         self.game = game
         self.parameters = parameters
@@ -25,6 +25,8 @@ class Chat:
         self.last_q = time.time() - self.parameters['next_pause']  # when question was asked
         self.questions = 0  # questions asked since game start
         self.users = {}  # users who answered at least once
+        self.got_correct_answer = False
+        self.lang = lang
 
     def new_user(self, user):
         self.users[user.id] = user
@@ -35,15 +37,15 @@ class Chat:
         :return: bool
             True if question could be changed, False if not
         """
-
         time_since_ask = time.time() - self.last_q
 
-        if time_since_ask >= self.parameters['next_pause'] and self.is_on:
+        if time_since_ask >= self.parameters['next_pause'] or self.got_correct_answer:
             self.q_id, self.hint = self.game.nextq()
             self.questions += 1
             self.q_count += 1
             self.last_q = time.time()
             self.last_hint = time.time()
+            self.got_correct_answer = False
             return True
         else:
             return False

@@ -34,3 +34,4 @@ class Chat(Base):
     q_id = Column(Integer)
     is_on = Column(Boolean)
     game = Column(String(20))
+    lang = Column(String(2))
