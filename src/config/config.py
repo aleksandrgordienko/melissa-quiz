@@ -19,6 +19,8 @@ class Config:
     LOG_LEVEL = 30  # 10-DEBUG, 20-INFO, 30-WARNING, 40-ERROR, 50-CRITICAL
     LOG_FILE_NAME = 'log.txt'
 
+    DEFAULT_LANGUAGE = os.environ.get('MELISSA_QUIZ_DEFAULT_LANG')
+
     DEFAULT_PARAMETERS = {'adv_minutes': 10,
                           'adv_questions': 20,
                           'base_points': 5,

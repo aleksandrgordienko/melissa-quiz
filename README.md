@@ -4,7 +4,9 @@
 
 - MELISSA_QUIZ_BOT_KEY - Telegram Bot API key 
 - MELISSA_QUIZ_TG_CHANNEL - Telegram Channel
+- MELISSA_QUIZ_TG_ADMINS - UserIDs of Bot administrators (for using /setparameter)
 - MELISSA_QUIZ_SQLALCHEMY_DB_CONN - SQLAlchemy connection string
+- MELISSA_QUIZ_DEFAULT_LANG - Default language for new chat
 
 **Using Docker image:**
 
