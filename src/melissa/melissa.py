@@ -519,6 +519,7 @@ class Melissa:
             user.add_points(multiplied_points)
             self.session.merge(models.User(chat_id=chat.id,
                                            id=user.id,
+                                           correct_answers=user.correct_answers,
                                            points=user.points,
                                            user_name=user.name))
             self.session.commit()
