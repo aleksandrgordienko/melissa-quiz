@@ -154,9 +154,6 @@ class Melissa:
         if update.effective_user.id not in self.admins:
             return
 
-        if update.effective_chat.id not in self.chats:
-            return
-
         try:
             parameter, value = update.message.text.split(' ', 3)[1:3]
             self.parameters[parameter] = value
