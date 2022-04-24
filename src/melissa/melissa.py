@@ -187,7 +187,7 @@ class Melissa:
                 points=self.chats[update.effective_chat.id].users[update.effective_user.id].get_points())
             # TODO implement: return rating place as well
         else:
-            out_text = self.texter.get_text('score_notagamer', lang=chat.lang)
+            out_text = self.texter.get_text('score_notagamer', lang=Config.DEFAULT_LANGUAGE)
         update.message.reply_text(out_text)
 
     def cmd_top(self, update, context):
